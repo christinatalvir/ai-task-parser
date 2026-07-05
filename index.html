@@ -91,7 +91,6 @@
 
   /* ---------- NAV ---------- */
   header.nav{
-    position:sticky; top:0; z-index:50;
     background:rgba(251,251,250,0.85);
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--border);
@@ -306,6 +305,18 @@
   tbody tr:hover{background:var(--bg-soft);}
   td.strong{color:var(--ink); font-weight:600;}
   .table-scroll{overflow-x:auto;}
+  .table-scroll-tall{
+    overflow-x:auto;
+    overflow-y:auto;
+    max-height:560px;
+  }
+  .table-scroll-tall thead th{
+    position:sticky;
+    top:0;
+    background:var(--bg-soft);
+    z-index:2;
+    box-shadow:0 1px 0 var(--border);
+  }
 
   .pill{
     display:inline-flex; align-items:center; gap:6px;
@@ -860,7 +871,7 @@
         <span class="title">Задачи · спринт 24</span>
         <span class="meta">8 из 8 обработано</span>
       </div>
-      <div class="table-scroll">
+      <div class="table-scroll-tall">
         <table style="min-width:1700px;">
           <thead>
             <tr>
