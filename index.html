@@ -715,6 +715,134 @@
         </table>
       </div>
     </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <span class="title">Правила определения исполнителя</span>
+        <span class="meta">3 правила</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Условие</th>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">исполнитель явно указан</td>
+              <td>Использовать его</td>
+            </tr>
+            <tr>
+              <td class="strong">исполнитель не указан</td>
+              <td>Определить предполагаемую ответственную команду по контексту</td>
+            </tr>
+            <tr>
+              <td class="strong">определить невозможно</td>
+              <td>Отметить «Требует уточнения»</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <span class="title">Правила формирования рабочей задачи</span>
+        <span class="meta">3 правила</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">Каждое сообщение должно быть преобразовано в одну или несколько задач</td>
+            </tr>
+            <tr>
+              <td class="strong">Формулировка задачи начинается с глагола (Исправить, Добавить, Обновить, Создать, Настроить, Подготовить, Реализовать и т.д.)</td>
+            </tr>
+            <tr>
+              <td class="strong">Если в одном сообщении содержится несколько независимых действий — создать несколько задач</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <span class="title">Правила определения неоднозначности</span>
+        <span class="meta">5 сигналов</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Сигнал</th>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">Не указан объём работ</td>
+              <td>Требует уточнения</td>
+            </tr>
+            <tr>
+              <td class="strong">Не указан исполнитель</td>
+              <td>Требует уточнения</td>
+            </tr>
+            <tr>
+              <td class="strong">Не указаны требования</td>
+              <td>Требует уточнения</td>
+            </tr>
+            <tr>
+              <td class="strong">Не указаны критерии приёмки</td>
+              <td>Требует уточнения</td>
+            </tr>
+            <tr>
+              <td class="strong">Не указан срок</td>
+              <td>Требует уточнения</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <span class="title">Правила определения возраста проблемы</span>
+        <span class="meta">3 сигнала</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Сигнал</th>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">второй день / третий день / N-й день</td>
+              <td>Зафиксировать предполагаемую дату возникновения проблемы (на основе текущей даты)</td>
+            </tr>
+            <tr>
+              <td class="strong">до сих пор</td>
+              <td>Отметить как длительно существующую проблему</td>
+            </tr>
+            <tr>
+              <td class="strong">третий раз / снова / опять</td>
+              <td>Зафиксировать повторяемость проблемы</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -733,81 +861,135 @@
         <span class="meta">8 из 8 обработано</span>
       </div>
       <div class="table-scroll">
-        <table>
+        <table style="min-width:1700px;">
           <thead>
             <tr>
-              <th>Задача</th>
-              <th>Тип</th>
+              <th>Источник</th>
+              <th>Исходное сообщение</th>
+              <th>Выявленный факт</th>
+              <th>Сформированная задача</th>
+              <th>Тип задачи</th>
               <th>Приоритет</th>
-              <th>Исполнитель</th>
-              <th>Срок</th>
-              <th>Статус</th>
+              <th>Дедлайн</th>
+              <th>Предполагаемый исполнитель</th>
+              <th>Риск</th>
+              <th>Зависимости</th>
+              <th>Требует уточнения</th>
+              <th>Обоснование решения</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td class="strong">Починить авторизацию перед релизом</td>
+              <td class="strong">Поддержка</td>
+              <td style="min-width:280px;">После оплаты у части клиентов не уходит письмо с чеком. Саппорт уже второй день отвечает руками. Хорошо бы починить сегодня, а то начнутся жалобы.</td>
+              <td style="min-width:220px;">У части клиентов после оплаты не отправляются письма с чеком. Поддержка вручную обрабатывает обращения уже второй день.</td>
+              <td class="strong" style="min-width:220px;">Исправить проблему с отправкой писем с чеком после оплаты.</td>
               <td><span class="pill bug">Bug</span></td>
               <td><span class="pill high">High</span></td>
-              <td>Аня К.</td>
-              <td>Пт, 12 июля</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+              <td>Сегодня</td>
+              <td>Backend-разработчик / команда платежей</td>
+              <td style="min-width:200px;">Жалобы клиентов, рост нагрузки на поддержку, ухудшение клиентского опыта</td>
+              <td style="min-width:200px;">Необходимо воспроизвести и найти причину ошибки отправки писем</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">Слова «сегодня» → High, «жалобы» → риск клиентского опыта. Фраза «хорошо бы» сама по себе приоритет не повышает.</td>
             </tr>
             <tr>
-              <td class="strong">Добавить фильтр по дате в отчётах</td>
+              <td class="strong">Маркетинг</td>
+              <td style="min-width:280px;">Нужен блок с кейсами на лендинге перед вебинаром 15 мая. Контент маркетинг почти собрал, нужен кто-то, кто это доведет до релиза.</td>
+              <td style="min-width:220px;">Требуется добавить блок кейсов на лендинг до вебинара. Контент почти готов.</td>
+              <td class="strong" style="min-width:220px;">Реализовать и опубликовать блок кейсов на лендинге.</td>
               <td><span class="pill feature">Feature</span></td>
               <td><span class="pill medium">Medium</span></td>
-              <td>Игорь П.</td>
-              <td>Ср, 17 июля</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+              <td>До вебинара (15 мая)</td>
+              <td>Frontend-разработчик / дизайнер / контент-команда</td>
+              <td style="min-width:200px;">Лендинг будет менее эффективен перед вебинаром</td>
+              <td style="min-width:200px;">Необходимо завершение подготовки контента маркетингом</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">Есть конкретный срок, но отсутствуют слова из правил, повышающие приоритет до High.</td>
             </tr>
             <tr>
-              <td class="strong">Пересмотреть регламент код-ревью</td>
+              <td class="strong">Онбординг</td>
+              <td style="min-width:280px;">Ребята, новички опять пишут всем в личку, потому что непонятно, где брать доступы и какие шаги делать в первую неделю. Давайте уже соберем одну нормальную инструкцию и чек-лист до конца недели.</td>
+              <td style="min-width:220px;">Новички регулярно испытывают трудности с онбордингом и обращаются в личные сообщения.</td>
+              <td class="strong" style="min-width:220px;">Создать единую инструкцию и чек-лист для онбординга новых сотрудников.</td>
               <td><span class="pill process">Process</span></td>
-              <td><span class="pill low">Low</span></td>
-              <td>Команда</td>
-              <td>Без срока</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
-            </tr>
-            <tr>
-              <td class="strong">Ускорить сборку CI</td>
-              <td><span class="pill improvement">Improvement</span></td>
               <td><span class="pill medium">Medium</span></td>
-              <td>Дима С.</td>
-              <td>Пн, 15 июля</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+              <td>До конца недели</td>
+              <td>HR / People Ops / Team Lead</td>
+              <td style="min-width:200px;">Потери времени сотрудников, неэффективный онбординг</td>
+              <td style="min-width:200px;">Нужно собрать информацию о доступах и этапах онбординга</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">Слово «опять» фиксирует повторяющуюся проблему, но само по себе приоритет не повышает.</td>
             </tr>
             <tr>
-              <td class="strong">Падает экспорт в PDF на больших отчётах</td>
+              <td class="strong">Мобайл</td>
+              <td style="min-width:280px;">На айфоне в Safari кнопка "Оплатить" уезжает за экран. С утра это показывали на созвоне. Желательно срочно, потому что это выглядит очень плохо.</td>
+              <td style="min-width:220px;">В Safari на iPhone кнопка оплаты отображается некорректно.</td>
+              <td class="strong" style="min-width:220px;">Исправить отображение кнопки «Оплатить» в Safari на iPhone.</td>
               <td><span class="pill bug">Bug</span></td>
               <td><span class="pill high">High</span></td>
-              <td>Аня К.</td>
-              <td>Чт, 11 июля</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+              <td>Срочно</td>
+              <td>Frontend-разработчик</td>
+              <td style="min-width:200px;">Пользователи могут не завершить оплату, ухудшение пользовательского опыта</td>
+              <td style="min-width:200px;">Нужно воспроизвести ошибку на Safari iPhone</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">Фраза «желательно срочно» → High согласно правилам.</td>
             </tr>
             <tr>
-              <td class="strong">Добавить онбординг для новых участников</td>
+              <td class="strong">Продажи</td>
+              <td style="min-width:280px;">Продажи давно просят автоматически собирать NPS после закрытия заказа. Не горит, но в следующем спринте было бы хорошо это наконец сделать.</td>
+              <td style="min-width:220px;">Есть давно накопившийся запрос на автоматический сбор NPS.</td>
+              <td class="strong" style="min-width:220px;">Реализовать автоматический сбор NPS после закрытия заказа.</td>
+              <td><span class="pill feature">Feature</span></td>
+              <td><span class="pill low">Low</span></td>
+              <td>В следующем спринте</td>
+              <td>Backend-разработчик / CRM-разработчик</td>
+              <td style="min-width:200px;">Продолжится ручной сбор или отсутствие обратной связи</td>
+              <td style="min-width:200px;">Требуется определить способ отправки NPS и интеграцию</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">«Не горит» → Low. Фраза «давно просят» по правилам не влияет на приоритет.</td>
+            </tr>
+            <tr>
+              <td class="strong">Пилот</td>
+              <td style="min-width:280px;">Клиент Acme попросил CSV-экспорт по филиалам к пятнице, иначе говорит, что будет сложно продлить пилот. Можете оценить и взять в работу?</td>
+              <td style="min-width:220px;">Клиенту необходим CSV-экспорт по филиалам к пятнице для продолжения пилота.</td>
+              <td class="strong" style="min-width:220px;">Оценить и реализовать CSV-экспорт по филиалам.</td>
               <td><span class="pill feature">Feature</span></td>
               <td><span class="pill high">High</span></td>
-              <td>Марина Т.</td>
-              <td>Вт, 16 июля</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+              <td>К пятнице</td>
+              <td>Backend-разработчик</td>
+              <td style="min-width:200px;">Возможна потеря продления пилотного проекта</td>
+              <td style="min-width:200px;">Требуется оценка объема работ и согласование реализации</td>
+              <td><span class="status clarify"><span class="dot"></span>Да</span></td>
+              <td style="min-width:260px;">Высокий приоритет определяется риском для клиента и наличием жесткого срока, однако необходимо уточнить требования к CSV.</td>
             </tr>
             <tr>
-              <td class="strong">Синхронизировать статусы между чатами</td>
+              <td class="strong">Операции</td>
+              <td style="min-width:280px;">Мы уже третий раз за неделю обсуждаем одни и те же задачи, потому что статусы разбросаны по Telegram и личкам. Нужен единый weekly update шаблон, можно внедрить на следующей неделе.</td>
+              <td style="min-width:220px;">Информация о статусах задач распределена по разным каналам, из-за чего повторяются обсуждения.</td>
+              <td class="strong" style="min-width:220px;">Разработать и внедрить единый шаблон weekly update.</td>
               <td><span class="pill process">Process</span></td>
-              <td><span class="pill high">High</span></td>
-              <td>Игорь П.</td>
-              <td>Пт, 12 июля</td>
-              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+              <td><span class="pill medium">Medium</span></td>
+              <td>На следующей неделе</td>
+              <td>Project Manager / Operations</td>
+              <td style="min-width:200px;">Потери времени, дублирование обсуждений, непрозрачность статусов</td>
+              <td style="min-width:200px;">Нужно определить формат шаблона и процесс использования</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">«Третий раз» фиксирует повторяющуюся проблему, но согласно правилам само по себе не повышает приоритет.</td>
             </tr>
             <tr>
-              <td class="strong">«Наверное, стоит обновить зависимости позже»</td>
+              <td class="strong">Юристы</td>
+              <td style="min-width:280px;">На сайте до сих пор старая оферта, юристы сегодня напомнили. Нужно обновить файл и ссылку до публикации релиза в среду.</td>
+              <td style="min-width:220px;">На сайте размещена устаревшая оферта.</td>
+              <td class="strong" style="min-width:220px;">Обновить файл оферты и ссылку до публикации релиза.</td>
               <td><span class="pill improvement">Improvement</span></td>
-              <td><span class="pill low">Low</span></td>
-              <td>—</td>
-              <td>—</td>
-              <td><span class="status clarify"><span class="dot"></span>Требует уточнения</span></td>
+              <td><span class="pill high">High</span></td>
+              <td>До релиза в среду</td>
+              <td>Контент-менеджер / Backend-разработчик / Web-мастер</td>
+              <td style="min-width:200px;">Публикация сайта с неактуальными юридическими документами</td>
+              <td style="min-width:200px;">Необходимо получить актуальную версию оферты от юристов</td>
+              <td><span class="status ready"><span class="dot"></span>Нет</span></td>
+              <td style="min-width:260px;">Есть обязательный срок «до публикации релиза». Слово «сегодня» относится к напоминанию юристов, а не к сроку выполнения, поэтому приоритет определяется риском публикации релиза с неверной документацией.</td>
             </tr>
           </tbody>
         </table>
