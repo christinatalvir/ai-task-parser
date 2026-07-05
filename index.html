@@ -39,7 +39,7 @@
   }
 
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth; overflow-x:hidden;}
   body{
     margin:0;
     background:var(--bg);
@@ -47,6 +47,7 @@
     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     -webkit-font-smoothing:antialiased;
     line-height:1.5;
+    overflow-x:hidden;
   }
   .mono{font-family:'IBM Plex Mono',monospace;}
 
@@ -247,13 +248,19 @@
     overflow-x:auto;
     overflow-y:auto;
     max-height:560px;
+    border-top:1px solid var(--border);
+  }
+  .table-scroll-tall thead{
+    position:sticky;
+    top:0;
+    z-index:3;
   }
   .table-scroll-tall thead th{
     position:sticky;
     top:0;
     background:var(--bg-soft);
     z-index:2;
-    box-shadow:0 1px 0 var(--border);
+    box-shadow:0 1px 0 var(--border-strong);
   }
 
   .pill{
@@ -419,7 +426,7 @@
 <section class="hero">
   <div class="wrap">
     <div class="hero-inner">
-      <span class="eyebrow">Автоматизация задач</span>
+      <span class="eyebrow">Генерация структурированных задач</span>
       <h1>AI Task Parser</h1>
       <p class="sub">Автоматическая трансформация хаотичных сообщений в структурированные задачи — система превращает неструктурированные сообщения команды в задачи с приоритетами, дедлайнами и исполнителями.</p>
     </div>
@@ -796,10 +803,10 @@
     <div class="panel">
       <div class="panel-head">
         <span class="title">Задачи · спринт 24</span>
-        <span class="meta">8 из 8 обработано</span>
+        <span class="meta" id="tasks-meta">— из — обработано</span>
       </div>
       <div class="table-scroll-tall">
-        <table style="min-width:1700px;">
+        <table id="tasks-table" style="min-width:1700px;">
           <thead>
             <tr>
               <th>Источник</th>
@@ -947,24 +954,24 @@
 
     <div class="kpi-group-title">Объём</div>
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="val">8</div><div class="lbl">Сообщений</div></div>
-      <div class="kpi-card"><div class="val">8</div><div class="lbl">Задач создано</div></div>
-      <div class="kpi-card accent"><div class="val">1</div><div class="lbl">Требует уточнения</div></div>
+      <div class="kpi-card"><div class="val" id="kpi-messages">0</div><div class="lbl">Сообщений</div></div>
+      <div class="kpi-card"><div class="val" id="kpi-tasks">0</div><div class="lbl">Задач создано</div></div>
+      <div class="kpi-card accent"><div class="val" id="kpi-clarify">0</div><div class="lbl">Требует уточнения</div></div>
     </div>
 
     <div class="kpi-group-title">По типу</div>
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="val" style="color:var(--red);">2</div><div class="lbl">Bug</div></div>
-      <div class="kpi-card"><div class="val" style="color:var(--accent-ink);">3</div><div class="lbl">Feature</div></div>
-      <div class="kpi-card"><div class="val" style="color:var(--violet);">2</div><div class="lbl">Process</div></div>
-      <div class="kpi-card"><div class="val" style="color:var(--teal);">1</div><div class="lbl">Improvement</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--red);" id="kpi-bug">0</div><div class="lbl">Bug</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--accent-ink);" id="kpi-feature">0</div><div class="lbl">Feature</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--violet);" id="kpi-process">0</div><div class="lbl">Process</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--teal);" id="kpi-improvement">0</div><div class="lbl">Improvement</div></div>
     </div>
 
     <div class="kpi-group-title">По приоритету</div>
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="val" style="color:var(--red);">4</div><div class="lbl">High</div></div>
-      <div class="kpi-card"><div class="val" style="color:var(--orange);">3</div><div class="lbl">Medium</div></div>
-      <div class="kpi-card"><div class="val" style="color:var(--green);">1</div><div class="lbl">Low</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--red);" id="kpi-high">0</div><div class="lbl">High</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--orange);" id="kpi-medium">0</div><div class="lbl">Medium</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--green);" id="kpi-low">0</div><div class="lbl">Low</div></div>
     </div>
   </div>
 </section>
@@ -1026,17 +1033,128 @@
 
 <script>
   const inkSecondary = '#57564F';
-
   Chart.defaults.font.family = "'Inter', sans-serif";
   Chart.defaults.color = inkSecondary;
+
+  // ---------------------------------------------------------------
+  // Единственный источник правды: таблица "Задачи, извлечённые из
+  // сообщений" (#tasks-table). Все KPI и графики считаются только
+  // из её строк — никаких вручную заданных чисел.
+  // ---------------------------------------------------------------
+
+  function parseTasksFromTable() {
+    const rows = document.querySelectorAll('#tasks-table tbody tr');
+    const tasks = [];
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (!cells.length) return;
+
+      const typeText = cells[4] ? cells[4].textContent.trim() : '';
+      const priorityText = cells[5] ? cells[5].textContent.trim() : '';
+      const clarifyText = cells[10] ? cells[10].textContent.trim() : '';
+
+      tasks.push({
+        type: typeText || null,          // Bug / Feature / Process / Improvement
+        priority: priorityText || null,  // High / Medium / Low
+        needsClarification: /да/i.test(clarifyText)
+      });
+    });
+
+    return tasks;
+  }
+
+  function computeAnalytics(tasks) {
+    const types = ['Bug', 'Feature', 'Process', 'Improvement'];
+    const priorities = ['High', 'Medium', 'Low'];
+
+    const byType = {};
+    types.forEach(t => byType[t] = 0);
+
+    const byPriority = {};
+    priorities.forEach(p => byPriority[p] = 0);
+
+    let needsClarification = 0;
+
+    tasks.forEach(task => {
+      if (task.type && byType.hasOwnProperty(task.type)) byType[task.type]++;
+      if (task.priority && byPriority.hasOwnProperty(task.priority)) byPriority[task.priority]++;
+      if (task.needsClarification) needsClarification++;
+    });
+
+    return {
+      totalMessages: tasks.length, // 1 сообщение → минимум 1 задача в этой таблице
+      totalTasks: tasks.length,
+      needsClarification,
+      byType,
+      byPriority
+    };
+  }
+
+  const tasks = parseTasksFromTable();
+  const analytics = computeAnalytics(tasks);
+
+  // Проверка целостности: сумма категорий должна совпадать с общим числом задач
+  const typeSum = Object.values(analytics.byType).reduce((a, b) => a + b, 0);
+  const prioritySum = Object.values(analytics.byPriority).reduce((a, b) => a + b, 0);
+  if (typeSum !== analytics.totalTasks) {
+    console.warn(`Сумма по типам (${typeSum}) не совпадает с общим числом задач (${analytics.totalTasks})`);
+  }
+  if (prioritySum !== analytics.totalTasks) {
+    console.warn(`Сумма по приоритетам (${prioritySum}) не совпадает с общим числом задач (${analytics.totalTasks})`);
+  }
+
+  // ---------------------------------------------------------------
+  // Заполняем KPI-карточки вычисленными значениями
+  // ---------------------------------------------------------------
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+
+  setText('kpi-messages', analytics.totalMessages);
+  setText('kpi-tasks', analytics.totalTasks);
+  setText('kpi-clarify', analytics.needsClarification);
+
+  setText('kpi-bug', analytics.byType.Bug);
+  setText('kpi-feature', analytics.byType.Feature);
+  setText('kpi-process', analytics.byType.Process);
+  setText('kpi-improvement', analytics.byType.Improvement);
+
+  setText('kpi-high', analytics.byPriority.High);
+  setText('kpi-medium', analytics.byPriority.Medium);
+  setText('kpi-low', analytics.byPriority.Low);
+
+  setText('tasks-meta', `${analytics.totalTasks} из ${analytics.totalTasks} обработано`);
+
+  // ---------------------------------------------------------------
+  // Графики строятся из тех же вычисленных данных
+  // ---------------------------------------------------------------
+  const typeColors = {
+    Bug: '#E0524B',
+    Feature: '#4F5DE0',
+    Process: '#8768DC',
+    Improvement: '#2F9A94'
+  };
+  const priorityColors = {
+    High: '#E0524B',
+    Medium: '#DC8A3C',
+    Low: '#3E9B6F'
+  };
+
+  const typeLabels = Object.keys(analytics.byType);
+  const typeValues = Object.values(analytics.byType);
+
+  const priorityLabels = Object.keys(analytics.byPriority);
+  const priorityValues = Object.values(analytics.byPriority);
 
   new Chart(document.getElementById('typeChart'), {
     type: 'pie',
     data: {
-      labels: ['Bug', 'Feature', 'Process', 'Improvement'],
+      labels: typeLabels,
       datasets: [{
-        data: [2, 3, 2, 1],
-        backgroundColor: ['#E0524B', '#4F5DE0', '#8768DC', '#2F9A94'],
+        data: typeValues,
+        backgroundColor: typeLabels.map(l => typeColors[l]),
         borderColor: '#FFFFFF',
         borderWidth: 2
       }]
@@ -1044,7 +1162,7 @@
     options: {
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight:8, usePointStyle: true, padding: 16, font: { size: 12.5 } } }
+        legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, padding: 16, font: { size: 12.5 } } }
       }
     }
   });
@@ -1052,10 +1170,10 @@
   new Chart(document.getElementById('priorityChart'), {
     type: 'bar',
     data: {
-      labels: ['High', 'Medium', 'Low'],
+      labels: priorityLabels,
       datasets: [{
-        data: [4, 3, 1],
-        backgroundColor: ['#E0524B', '#DC8A3C', '#3E9B6F'],
+        data: priorityValues,
+        backgroundColor: priorityLabels.map(l => priorityColors[l]),
         borderRadius: 6,
         maxBarThickness: 56
       }]
