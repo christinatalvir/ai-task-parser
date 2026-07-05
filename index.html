@@ -109,16 +109,6 @@
     display:flex; align-items:center; justify-content:center;
   }
   .brand-mark svg{width:13px; height:13px;}
-  .nav-cta{
-    font-size:14px; font-weight:600;
-    padding:9px 16px;
-    border-radius:8px;
-    background:var(--ink);
-    color:#fff;
-    border:none;
-    cursor:pointer;
-  }
-  .nav-cta:hover{background:var(--accent-ink);}
 
   /* ---------- HERO ---------- */
   .hero{padding:120px 0 96px; border-top:none;}
@@ -133,59 +123,6 @@
     color:var(--ink-2);
     max-width:620px;
     line-height:1.6;
-  }
-  .hero-actions{
-    margin-top:36px;
-    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
-  }
-  .btn-primary{
-    background:var(--ink); color:#fff;
-    padding:13px 22px;
-    border-radius:9px;
-    border:none;
-    font-size:15px; font-weight:600;
-    cursor:pointer;
-  }
-  .btn-primary:hover{background:var(--accent-ink);}
-  .btn-secondary{
-    background:transparent;
-    border:1px solid var(--border-strong);
-    padding:13px 22px;
-    border-radius:9px;
-    font-size:15px; font-weight:600;
-    cursor:pointer;
-    color:var(--ink);
-  }
-  .btn-secondary:hover{border-color:var(--ink);}
-
-  .hero-visual{
-    margin-top:64px;
-    border:1px solid var(--border);
-    border-radius:var(--radius-lg);
-    background:var(--bg-raised);
-    box-shadow:var(--shadow-md);
-    padding:20px;
-    overflow:hidden;
-  }
-  .hero-visual .fake-toolbar{
-    display:flex; gap:6px; margin-bottom:16px; padding:0 4px;
-  }
-  .fake-toolbar span{width:10px; height:10px; border-radius:50%; background:var(--border-strong);}
-  .terminal-line{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:13px;
-    padding:9px 12px;
-    border-radius:6px;
-    background:var(--bg-soft);
-    margin-bottom:6px;
-    color:var(--ink-2);
-    display:flex; justify-content:space-between; gap:12px;
-  }
-  .terminal-line .arrow{color:var(--ink-3);}
-  .terminal-line b{color:var(--ink); font-weight:600;}
-  .terminal-line .tag{
-    font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px;
-    white-space:nowrap;
   }
 
   /* ---------- PROBLEM ---------- */
@@ -224,6 +161,7 @@
     align-items:stretch;
     gap:0;
     overflow-x:auto;
+    overflow-y:hidden;
     padding-bottom:8px;
   }
   .pipe-card{
@@ -474,7 +412,6 @@
       </span>
       AI Task Parser
     </div>
-    <button class="nav-cta" onclick="document.getElementById('demo').scrollIntoView()">Смотреть демо</button>
   </div>
 </header>
 
@@ -485,16 +422,6 @@
       <span class="eyebrow">Автоматизация задач</span>
       <h1>AI Task Parser</h1>
       <p class="sub">Автоматическая трансформация хаотичных сообщений в структурированные задачи — система превращает неструктурированные сообщения команды в задачи с приоритетами, дедлайнами и исполнителями.</p>
-      <div class="hero-actions">
-        <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView()">Попробовать на своих сообщениях</button>
-        <button class="btn-secondary" onclick="document.getElementById('pipeline').scrollIntoView()">Как это работает</button>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="fake-toolbar"><span></span><span></span><span></span></div>
-      <div class="terminal-line"><span>Аня: «до пятницы бы поправить баг с авторизацией, иначе релиз горит»</span></div>
-      <div class="terminal-line"><span class="arrow">→ извлечено:</span> <b>Bug</b> <span class="tag" style="background:var(--red-soft); color:var(--red);">High</span> <span class="tag" style="background:var(--bg-soft); color:var(--ink-2);">дедлайн: пт</span></div>
     </div>
   </div>
 </section>
