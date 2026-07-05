@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Task Parser — из хаоса в структуру</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#FBFBFA;
+    --bg-raised:#FFFFFF;
+    --bg-soft:#F5F4F1;
+    --border:#E8E6E1;
+    --border-strong:#DCDAD4;
+    --ink:#191918;
+    --ink-2:#57564F;
+    --ink-3:#8C8A82;
+    --accent:#4F5DE0;
+    --accent-ink:#3B47C4;
+    --accent-soft:#ECEEFB;
+    --red:#E0524B;
+    --red-soft:#FBEAE9;
+    --orange:#DC8A3C;
+    --orange-soft:#FBF0E3;
+    --green:#3E9B6F;
+    --green-soft:#E9F5EF;
+    --violet:#8768DC;
+    --violet-soft:#F0EBFA;
+    --teal:#2F9A94;
+    --teal-soft:#E7F5F3;
+    --radius:10px;
+    --radius-lg:16px;
+    --shadow-sm:0 1px 2px rgba(25,25,24,0.04);
+    --shadow-md:0 4px 16px rgba(25,25,24,0.06);
+    --maxw:1120px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  a{color:inherit;}
+  ::selection{background:var(--accent-soft);}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 32px;
+  }
+  section{padding:96px 0;}
+  section + section{border-top:1px solid var(--border);}
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--accent-ink);
+    text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+    display:inline-block;
+  }
+
+  h1,h2,h3{
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin:0;
+  }
+  h2{font-size:32px; color:var(--ink);}
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .section-head p{color:var(--ink-2); font-size:16px; margin-top:12px;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(251,251,250,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{
+    max-width:var(--maxw); margin:0 auto; padding:16px 32px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:700; font-size:15px;
+  }
+  .brand-mark{
+    width:24px; height:24px; border-radius:6px;
+    background:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand-mark svg{width:13px; height:13px;}
+  .nav-cta{
+    font-size:14px; font-weight:600;
+    padding:9px 16px;
+    border-radius:8px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+  }
+  .nav-cta:hover{background:var(--accent-ink);}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:120px 0 96px; border-top:none;}
+  .hero-inner{max-width:760px;}
+  .hero h1{
+    font-size:56px;
+    line-height:1.05;
+  }
+  .hero .sub{
+    margin-top:24px;
+    font-size:19px;
+    color:var(--ink-2);
+    max-width:620px;
+    line-height:1.6;
+  }
+  .hero-actions{
+    margin-top:36px;
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  }
+  .btn-primary{
+    background:var(--ink); color:#fff;
+    padding:13px 22px;
+    border-radius:9px;
+    border:none;
+    font-size:15px; font-weight:600;
+    cursor:pointer;
+  }
+  .btn-primary:hover{background:var(--accent-ink);}
+  .btn-secondary{
+    background:transparent;
+    border:1px solid var(--border-strong);
+    padding:13px 22px;
+    border-radius:9px;
+    font-size:15px; font-weight:600;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .btn-secondary:hover{border-color:var(--ink);}
+
+  .hero-visual{
+    margin-top:64px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    background:var(--bg-raised);
+    box-shadow:var(--shadow-md);
+    padding:20px;
+    overflow:hidden;
+  }
+  .hero-visual .fake-toolbar{
+    display:flex; gap:6px; margin-bottom:16px; padding:0 4px;
+  }
+  .fake-toolbar span{width:10px; height:10px; border-radius:50%; background:var(--border-strong);}
+  .terminal-line{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    padding:9px 12px;
+    border-radius:6px;
+    background:var(--bg-soft);
+    margin-bottom:6px;
+    color:var(--ink-2);
+    display:flex; justify-content:space-between; gap:12px;
+  }
+  .terminal-line .arrow{color:var(--ink-3);}
+  .terminal-line b{color:var(--ink); font-weight:600;}
+  .terminal-line .tag{
+    font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px;
+    white-space:nowrap;
+  }
+
+  /* ---------- PROBLEM ---------- */
+  .problem-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+  }
+  .problem-card{
+    background:var(--bg-raised);
+    padding:28px 22px;
+  }
+  .problem-card .icon{
+    width:34px; height:34px;
+    border-radius:8px;
+    background:var(--red-soft);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:18px;
+  }
+  .problem-card .icon svg{width:16px; height:16px; stroke:var(--red);}
+  .problem-card p{
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin:0;
+    line-height:1.45;
+  }
+
+  /* ---------- PIPELINE ---------- */
+  .pipeline{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    overflow-x:auto;
+    padding-bottom:8px;
+  }
+  .pipe-card{
+    flex:1 1 0;
+    min-width:170px;
+    background:var(--bg-raised);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:24px 18px;
+    text-align:left;
+  }
+  .pipe-card .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-3);
+    margin-bottom:14px;
+    display:block;
+  }
+  .pipe-card .pipe-icon{
+    width:36px; height:36px;
+    border-radius:9px;
+    background:var(--accent-soft);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:16px;
+  }
+  .pipe-card .pipe-icon svg{width:17px; height:17px; stroke:var(--accent-ink);}
+  .pipe-card h3{font-size:14.5px; font-weight:700; margin-bottom:6px;}
+  .pipe-card p{font-size:13px; color:var(--ink-2); margin:0; line-height:1.5;}
+  .pipe-arrow{
+    flex:0 0 auto;
+    width:40px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-3);
+  }
+  .pipe-arrow svg{width:18px; height:18px;}
+
+  @media (max-width:860px){
+    .pipeline{flex-direction:column;}
+    .pipe-card{min-width:0;}
+    .pipe-arrow{width:100%; height:28px; transform:rotate(90deg);}
+  }
+
+  /* ---------- TABLE PANEL ---------- */
+  .panel{
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    background:var(--bg-raised);
+    box-shadow:var(--shadow-sm);
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 22px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg-soft);
+  }
+  .panel-head .title{font-size:14px; font-weight:700;}
+  .panel-head .meta{font-size:12.5px; color:var(--ink-3);}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--ink-3);
+    font-weight:600;
+    padding:12px 22px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:14px 22px;
+    border-bottom:1px solid var(--border);
+    color:var(--ink-2);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--bg-soft);}
+  td.strong{color:var(--ink); font-weight:600;}
+  .table-scroll{overflow-x:auto;}
+
+  .pill{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:600;
+    padding:4px 10px;
+    border-radius:99px;
+    white-space:nowrap;
+  }
+  .pill::before{width:6px; height:6px; border-radius:50%; content:'';}
+  .pill.bug{background:var(--red-soft); color:var(--red);}
+  .pill.bug::before{background:var(--red);}
+  .pill.feature{background:var(--accent-soft); color:var(--accent-ink);}
+  .pill.feature::before{background:var(--accent);}
+  .pill.process{background:var(--violet-soft); color:var(--violet);}
+  .pill.process::before{background:var(--violet);}
+  .pill.improvement{background:var(--teal-soft); color:var(--teal);}
+  .pill.improvement::before{background:var(--teal);}
+
+  .pill.high{background:var(--red-soft); color:var(--red);}
+  .pill.high::before{background:var(--red);}
+  .pill.medium{background:var(--orange-soft); color:var(--orange);}
+  .pill.medium::before{background:var(--orange);}
+  .pill.low{background:var(--green-soft); color:var(--green);}
+  .pill.low::before{background:var(--green);}
+
+  .status{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12.5px; font-weight:500; color:var(--ink-2);
+  }
+  .status .dot{width:7px; height:7px; border-radius:50%;}
+  .status.clarify .dot{background:var(--orange);}
+  .status.ready .dot{background:var(--green);}
+
+  code.rule{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    background:var(--bg-soft);
+    border:1px solid var(--border);
+    padding:3px 7px;
+    border-radius:5px;
+    color:var(--ink);
+  }
+
+  /* ---------- KPI ---------- */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+  }
+  .kpi-card{
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:var(--bg-raised);
+    padding:22px 20px;
+  }
+  .kpi-card .val{
+    font-size:30px; font-weight:800; letter-spacing:-0.02em;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .kpi-card .lbl{
+    font-size:12.5px; color:var(--ink-2); margin-top:6px; font-weight:500;
+  }
+  .kpi-card.accent .val{color:var(--accent-ink);}
+  .kpi-group-title{
+    font-size:12px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.03em; color:var(--ink-3);
+    margin:36px 0 14px;
+  }
+  .kpi-group-title:first-of-type{margin-top:0;}
+
+  @media (max-width:900px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* ---------- CHARTS ---------- */
+  .chart-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .chart-card{
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    background:var(--bg-raised);
+    padding:26px;
+  }
+  .chart-card h3{font-size:14.5px; font-weight:700; margin-bottom:4px;}
+  .chart-card .chart-sub{font-size:12.5px; color:var(--ink-3); margin-bottom:20px; display:block;}
+  .chart-box{position:relative; height:260px;}
+
+  @media (max-width:800px){
+    .chart-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- SUMMARY ---------- */
+  .summary{
+    background:var(--ink);
+    border-radius:var(--radius-lg);
+    padding:56px 48px;
+    color:#fff;
+  }
+  .summary-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:32px;
+  }
+  .summary-item{display:flex; gap:14px;}
+  .summary-item .check{
+    width:26px; height:26px; border-radius:50%;
+    background:rgba(255,255,255,0.1);
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto; margin-top:2px;
+  }
+  .summary-item .check svg{width:13px; height:13px; stroke:#fff;}
+  .summary-item p{margin:0; font-size:14.5px; color:rgba(255,255,255,0.82); line-height:1.5;}
+  .summary-top{max-width:520px; margin-bottom:40px;}
+  .summary-top h2{color:#fff;}
+  .summary-top p{color:rgba(255,255,255,0.6); margin-top:10px;}
+
+  @media (max-width:800px){
+    .summary-grid{grid-template-columns:1fr;}
+  }
+
+  footer{
+    padding:40px 0;
+    text-align:center;
+    color:var(--ink-3);
+    font-size:13px;
+  }
+
+  @media (max-width:900px){
+    .problem-grid{grid-template-columns:repeat(2,1fr);}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 20px;}
+    section{padding:64px 0;}
+    .hero{padding:64px 0 56px;}
+    .hero h1{font-size:38px;}
+    .hero .sub{font-size:16.5px;}
+    h2{font-size:26px;}
+    .problem-grid{grid-template-columns:1fr;}
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .summary{padding:36px 24px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L10 18L20 6" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      AI Task Parser
+    </div>
+    <button class="nav-cta" onclick="document.getElementById('demo').scrollIntoView()">Смотреть демо</button>
+  </div>
+</header>
+
+<!-- 1. HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <span class="eyebrow">Автоматизация задач</span>
+      <h1>AI Task Parser</h1>
+      <p class="sub">Автоматическая трансформация хаотичных сообщений в структурированные задачи — система превращает неструктурированные сообщения команды в задачи с приоритетами, дедлайнами и исполнителями.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView()">Попробовать на своих сообщениях</button>
+        <button class="btn-secondary" onclick="document.getElementById('pipeline').scrollIntoView()">Как это работает</button>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="fake-toolbar"><span></span><span></span><span></span></div>
+      <div class="terminal-line"><span>Аня: «до пятницы бы поправить баг с авторизацией, иначе релиз горит»</span></div>
+      <div class="terminal-line"><span class="arrow">→ извлечено:</span> <b>Bug</b> <span class="tag" style="background:var(--red-soft); color:var(--red);">High</span> <span class="tag" style="background:var(--bg-soft); color:var(--ink-2);">дедлайн: пт</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Проблема</span>
+      <h2>Команда работает, а контекст теряется</h2>
+      <p>Обсуждения происходят быстрее, чем успевает формироваться структура вокруг них.</p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <p>Договорённости живут в личках</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke-width="1.8"/><path d="M9 9l6 6M15 9l-6 6" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <p>Задачи теряются</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <p>Дедлайны неоднозначны</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4M12 17h.01" stroke-width="1.8" stroke-linecap="round"/><path d="M10.3 3.9 2.6 17.2A1.5 1.5 0 0 0 3.9 19.5h16.2a1.5 1.5 0 0 0 1.3-2.3L13.7 3.9a1.5 1.5 0 0 0-2.6 0Z" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        <p>Риски не видны</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="7" height="7" rx="1.4" stroke-width="1.8"/><rect x="14" y="4" width="7" height="7" rx="1.4" stroke-width="1.8"/><rect x="3" y="15" width="7" height="5" rx="1.4" stroke-width="1.8"/><rect x="14" y="15" width="7" height="5" rx="1.4" stroke-width="1.8"/></svg></div>
+        <p>Статусы разбросаны</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. PIPELINE -->
+<section id="pipeline">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Как работает система</span>
+      <h2>От сообщения до аналитики — один проход</h2>
+      <p>Каждое сообщение проходит фиксированную цепочку обработки, ничего не выпадает и не зависает в неопределённости.</p>
+    </div>
+
+    <div class="pipeline">
+      <div class="pipe-card">
+        <span class="num">01</span>
+        <div class="pipe-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Сообщения</h3>
+        <p>Сырой поток из чатов команды.</p>
+      </div>
+      <div class="pipe-arrow"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="pipe-card">
+        <span class="num">02</span>
+        <div class="pipe-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 3H5a2 2 0 0 0-2 2v4m18 0V5a2 2 0 0 0-2-2h-4m0 18h4a2 2 0 0 0 2-2v-4M3 15v4a2 2 0 0 0 2 2h4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Правила анализа</h3>
+        <p>Разметка по паттернам и ключевым словам.</p>
+      </div>
+      <div class="pipe-arrow"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="pipe-card">
+        <span class="num">03</span>
+        <div class="pipe-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3>Извлечение сущностей ИИ</h3>
+        <p>Модель находит исполнителя, срок, приоритет.</p>
+      </div>
+      <div class="pipe-arrow"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="pipe-card">
+        <span class="num">04</span>
+        <div class="pipe-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="16" rx="2" stroke-width="1.8"/><path d="M3 9h18M8 4v16" stroke-width="1.8"/></svg></div>
+        <h3>Структурированная задача</h3>
+        <p>Готовая карточка со всеми полями.</p>
+      </div>
+      <div class="pipe-arrow"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="pipe-card">
+        <span class="num">05</span>
+        <div class="pipe-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19V9M12 19V4M20 19v-6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Аналитика и графики</h3>
+        <p>Сводная картина по всей команде.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. RULES TABLE -->
+<section id="rules">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Правила анализа</span>
+      <h2>Что система ищет в тексте</h2>
+      <p>Слой правил размечает сообщение до передачи в модель — так снижается неопределённость извлечения.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="title">Правила определения приоритетов</span>
+        <span class="meta">7 сигналов</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Сигнал в сообщении</th>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">сегодня</td>
+              <td><span class="pill high">High</span></td>
+            </tr>
+            <tr>
+              <td class="strong">срочно / желательно срочно</td>
+              <td><span class="pill high">High</span></td>
+            </tr>
+            <tr>
+              <td class="strong">жалобы клиентов</td>
+              <td>Повысить приоритет и отметить риск для клиентского опыта</td>
+            </tr>
+            <tr>
+              <td class="strong">не горит</td>
+              <td><span class="pill low">Low</span></td>
+            </tr>
+            <tr>
+              <td class="strong">хорошо бы</td>
+              <td>Пожелание. Приоритет определяется по остальному контексту, автоматически не повышается</td>
+            </tr>
+            <tr>
+              <td class="strong">давно просят</td>
+              <td>Накопленный запрос. Сам по себе не влияет на приоритет</td>
+            </tr>
+            <tr>
+              <td class="strong">повторно обсуждается (второй/третий раз, опять, снова)</td>
+              <td>Зафиксировать как повторяющуюся проблему, приоритет определяется контекстом</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <span class="title">Правила определения рисков</span>
+        <span class="meta">6 сигналов</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Сигнал</th>
+              <th>Интерпретация</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">жалобы клиентов</td>
+              <td>Риск ухудшения клиентского опыта</td>
+            </tr>
+            <tr>
+              <td class="strong">иначе сорвётся пилот</td>
+              <td>Критический бизнес-риск</td>
+            </tr>
+            <tr>
+              <td class="strong">сложно продлить пилот</td>
+              <td>Критический бизнес-риск</td>
+            </tr>
+            <tr>
+              <td class="strong">кнопка «Оплатить» не работает / невозможно выполнить оплату</td>
+              <td>Риск потери конверсии и продаж</td>
+            </tr>
+            <tr>
+              <td class="strong">до сих пор</td>
+              <td>Длительно нерешённая проблема</td>
+            </tr>
+            <tr>
+              <td class="strong">повторное обсуждение одной и той же темы</td>
+              <td>Процессный риск</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <span class="title">Правила определения дедлайна</span>
+        <span class="meta">7 сигналов</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Сигнал</th>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">сегодня</td>
+              <td>Преобразовать в абсолютную дату по текущему календарю</td>
+            </tr>
+            <tr>
+              <td class="strong">к пятнице</td>
+              <td>Преобразовать в дату ближайшей пятницы</td>
+            </tr>
+            <tr>
+              <td class="strong">до конца недели</td>
+              <td>Преобразовать в дату конца текущей недели</td>
+            </tr>
+            <tr>
+              <td class="strong">следующая неделя</td>
+              <td>Преобразовать в дату конца следующей недели</td>
+            </tr>
+            <tr>
+              <td class="strong">следующий спринт</td>
+              <td>Преобразовать в дату окончания следующего спринта</td>
+            </tr>
+            <tr>
+              <td class="strong">конкретная дата</td>
+              <td>Использовать как абсолютный дедлайн</td>
+            </tr>
+            <tr>
+              <td class="strong">до релиза / до публикации релиза</td>
+              <td>Использовать дату релиза проекта как дедлайн</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. TASKS TABLE -->
+<section id="demo">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Результат</span>
+      <h2>Задачи, извлечённые из сообщений</h2>
+      <p>Каждая строка — отдельное сообщение, превращённое в задачу с полным набором атрибутов.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="title">Задачи · спринт 24</span>
+        <span class="meta">8 из 8 обработано</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Задача</th>
+              <th>Тип</th>
+              <th>Приоритет</th>
+              <th>Исполнитель</th>
+              <th>Срок</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="strong">Починить авторизацию перед релизом</td>
+              <td><span class="pill bug">Bug</span></td>
+              <td><span class="pill high">High</span></td>
+              <td>Аня К.</td>
+              <td>Пт, 12 июля</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">Добавить фильтр по дате в отчётах</td>
+              <td><span class="pill feature">Feature</span></td>
+              <td><span class="pill medium">Medium</span></td>
+              <td>Игорь П.</td>
+              <td>Ср, 17 июля</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">Пересмотреть регламент код-ревью</td>
+              <td><span class="pill process">Process</span></td>
+              <td><span class="pill low">Low</span></td>
+              <td>Команда</td>
+              <td>Без срока</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">Ускорить сборку CI</td>
+              <td><span class="pill improvement">Improvement</span></td>
+              <td><span class="pill medium">Medium</span></td>
+              <td>Дима С.</td>
+              <td>Пн, 15 июля</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">Падает экспорт в PDF на больших отчётах</td>
+              <td><span class="pill bug">Bug</span></td>
+              <td><span class="pill high">High</span></td>
+              <td>Аня К.</td>
+              <td>Чт, 11 июля</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">Добавить онбординг для новых участников</td>
+              <td><span class="pill feature">Feature</span></td>
+              <td><span class="pill high">High</span></td>
+              <td>Марина Т.</td>
+              <td>Вт, 16 июля</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">Синхронизировать статусы между чатами</td>
+              <td><span class="pill process">Process</span></td>
+              <td><span class="pill high">High</span></td>
+              <td>Игорь П.</td>
+              <td>Пт, 12 июля</td>
+              <td><span class="status ready"><span class="dot"></span>Готова</span></td>
+            </tr>
+            <tr>
+              <td class="strong">«Наверное, стоит обновить зависимости позже»</td>
+              <td><span class="pill improvement">Improvement</span></td>
+              <td><span class="pill low">Low</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td><span class="status clarify"><span class="dot"></span>Требует уточнения</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. ANALYTICS -->
+<section id="analytics">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Аналитика</span>
+      <h2>Сводка по спринту</h2>
+      <p>Агрегированные показатели по всем обработанным сообщениям.</p>
+    </div>
+
+    <div class="kpi-group-title">Объём</div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="val">8</div><div class="lbl">Сообщений</div></div>
+      <div class="kpi-card"><div class="val">8</div><div class="lbl">Задач создано</div></div>
+      <div class="kpi-card accent"><div class="val">1</div><div class="lbl">Требует уточнения</div></div>
+    </div>
+
+    <div class="kpi-group-title">По типу</div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="val" style="color:var(--red);">2</div><div class="lbl">Bug</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--accent-ink);">3</div><div class="lbl">Feature</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--violet);">2</div><div class="lbl">Process</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--teal);">1</div><div class="lbl">Improvement</div></div>
+    </div>
+
+    <div class="kpi-group-title">По приоритету</div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="val" style="color:var(--red);">4</div><div class="lbl">High</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--orange);">3</div><div class="lbl">Medium</div></div>
+      <div class="kpi-card"><div class="val" style="color:var(--green);">1</div><div class="lbl">Low</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. CHARTS -->
+<section id="charts">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Графики</span>
+      <h2>Распределение задач</h2>
+      <p>Тот же набор данных, что и в карточках выше, — в виде графиков.</p>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Типы задач</h3>
+        <span class="chart-sub">Bug / Feature / Process / Improvement</span>
+        <div class="chart-box"><canvas id="typeChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Приоритеты</h3>
+        <span class="chart-sub">High / Medium / Low</span>
+        <div class="chart-box"><canvas id="priorityChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. SUMMARY -->
+<section id="summary">
+  <div class="wrap">
+    <div class="summary">
+      <div class="summary-top">
+        <span class="eyebrow" style="color:#fff;">Итог</span>
+        <h2>Хаос на входе, структура на выходе</h2>
+        <p>Ничего не потеряно, каждое сообщение получило владельца и срок.</p>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L10 18L20 6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <p>Все сообщения преобразованы в структурированные задачи</p>
+        </div>
+        <div class="summary-item">
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L10 18L20 6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <p>Определены приоритеты, дедлайны и риски</p>
+        </div>
+        <div class="summary-item">
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L10 18L20 6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <p>Меньше хаоса и потерь информации</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">AI Task Parser · превращаем сообщения в задачи</div>
+</footer>
+
+<script>
+  const inkSecondary = '#57564F';
+
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = inkSecondary;
+
+  new Chart(document.getElementById('typeChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Bug', 'Feature', 'Process', 'Improvement'],
+      datasets: [{
+        data: [2, 3, 2, 1],
+        backgroundColor: ['#E0524B', '#4F5DE0', '#8768DC', '#2F9A94'],
+        borderColor: '#FFFFFF',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight:8, usePointStyle: true, padding: 16, font: { size: 12.5 } } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('priorityChart'), {
+    type: 'bar',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{
+        data: [4, 3, 1],
+        backgroundColor: ['#E0524B', '#DC8A3C', '#3E9B6F'],
+        borderRadius: 6,
+        maxBarThickness: 56
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#E8E6E1' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
